@@ -3,10 +3,17 @@ defmodule AllTheSinglePhotosWeb.AuthController do
 
   plug Ueberauth
 
-  def sign_in(conn, %{}) do
+  def signin(conn, %{}) do
     # TODO: why is flash not available here?????
 
-    text conn, "onwards to signin"
+    render(conn, "signin.html")
+  end
+
+
+  def delete(conn, _params) do
+    conn
+    |> configure_session(drop: true)
+    |> redirect(to: Routes.page_path(conn, :index))
   end
 
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do

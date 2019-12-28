@@ -13,7 +13,7 @@ defmodule AllTheSinglePhotosWeb.Plugs.RequireAuth do
     else
       conn
       |> put_flash(:error, "Please sign in to find all your single photos")
-      |> redirect(to: Helpers.auth_path(conn, :sign_in))
+      |> redirect(to: Helpers.auth_path(conn, :signin))
       |> halt()
     end
   end

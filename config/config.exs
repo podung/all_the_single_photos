@@ -34,7 +34,7 @@ import_config "#{Mix.env()}.exs"
 
 config :ueberauth, Ueberauth,
   providers: [
-        google: {Ueberauth.Strategy.Google, []}
+        google: {Ueberauth.Strategy.Google, [prompt: "select_account", default_scope: "email profile"]}
       ]
 
 config :ueberauth, Ueberauth.Strategy.Google.OAuth,

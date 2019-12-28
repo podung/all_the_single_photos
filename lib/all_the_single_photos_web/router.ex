@@ -30,7 +30,9 @@ defmodule AllTheSinglePhotosWeb.Router do
   scope "/auth", AllTheSinglePhotosWeb do
     pipe_through :browser
 
-    get "/sign_in", AuthController, :sign_in
+    get "/signin", AuthController, :signin
+    get "/signout", AuthController, :delete
+
     get "/:provider", AuthController, :request
     get "/:provider/callback", AuthController, :callback
   end

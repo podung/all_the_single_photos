@@ -1,0 +1,5 @@
+<h1>Google Authorization</h1>
+<p>You must provide access to your Google Photos libary in order to find All the single (Google) photos</p>
+<%= "/images/google_signin.png"
+      |> img_tag()
+      |> link(to: Routes.auth_path(@conn, :request, "google")) %>
