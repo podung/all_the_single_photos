@@ -20,5 +20,5 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import LiveSocket from "phoenix_live_view"
 
-let liveSocket = new LiveSocket("/live", Socket)
+let liveSocket = new LiveSocket("/live", Socket, { viewLogger: (view, kind, msg, obj) => console.log(`${view.id} ${kind}: ${msg} - `, obj) });
 liveSocket.connect()

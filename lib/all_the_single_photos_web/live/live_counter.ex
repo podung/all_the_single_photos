@@ -12,6 +12,8 @@ defmodule AllTheSinglePhotosWeb.LiveCounter do
   end
 
   def mount(_session, socket) do
+    IO.puts "In the logger and connected: #{connected?(socket)}"
+
     {:ok, assign(socket, :val, 0)}
   end
 

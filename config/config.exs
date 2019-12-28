@@ -34,7 +34,9 @@ import_config "#{Mix.env()}.exs"
 
 config :ueberauth, Ueberauth,
   providers: [
-        google: {Ueberauth.Strategy.Google, [prompt: "select_account", default_scope: "email profile"]}
+        google: {Ueberauth.Strategy.Google, [
+          prompt: "select_account",
+          default_scope: "email profile https://www.googleapis.com/auth/photoslibrary.readonly"]}
       ]
 
 config :ueberauth, Ueberauth.Strategy.Google.OAuth,
