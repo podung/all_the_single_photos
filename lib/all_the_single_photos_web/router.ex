@@ -8,6 +8,7 @@ defmodule AllTheSinglePhotosWeb.Router do
     plug Phoenix.LiveView.Flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug AllTheSinglePhotosWeb.Plugs.SetUser
   end
 
   pipeline :api do
@@ -29,9 +30,9 @@ defmodule AllTheSinglePhotosWeb.Router do
   scope "/auth", AllTheSinglePhotosWeb do
     pipe_through :browser
 
-    #get "/:provider", AuthController, :request
-    #get "/:provider/callback", AuthController, :callback
     get "/sign_in", AuthController, :sign_in
+    get "/:provider", AuthController, :request
+    get "/:provider/callback", AuthController, :callback
   end
 
 
