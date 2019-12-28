@@ -8,3 +8,5 @@
     <li><%= "#{k}: #{v}" %></li>
   <% end) %>
 </ul>
+
+<%= live_render(@conn, AllTheSinglePhotosWeb.LiveCounter) %>
