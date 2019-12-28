@@ -14,18 +14,27 @@ defmodule AllTheSinglePhotosWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :authenticated do
+    plug :browser
+
+    plug AllTheSinglePhotosWeb.Plugs.RequireAuth
+  end
+
   scope "/", AllTheSinglePhotosWeb do
-    pipe_through :browser
+    pipe_through :authenticated
 
     get "/", PageController, :index
   end
 
-  scope "/auth", MyApp do
+  scope "/auth", AllTheSinglePhotosWeb do
     pipe_through :browser
 
-    get "/:provider", AuthController, :request
-    get "/:provider/callback", AuthController, :callback
+    #get "/:provider", AuthController, :request
+    #get "/:provider/callback", AuthController, :callback
+    get "/sign_in", AuthController, :sign_in
   end
+
+
 
   # Other scopes may use custom stacks.
   # scope "/api", AllTheSinglePhotosWeb do
