@@ -1,13 +1,3 @@
-<section class="phx-hero">
-  <h1><%= gettext "Welcome, %{email}!", email: @conn.assigns[:user].email  %></h1>
-  <p>A productive web framework that<br/>does not compromise speed or maintainability.</p>
-</section>
+<h1><%= gettext "Welcome, %{email}!", email: @conn.assigns[:user].email  %></h1>
 
-<ul>
-  <%= Enum.map(@conn.assigns[:user], fn {k,v} -> %>
-    <li><%= "#{k}: #{v}" %></li>
-  <% end) %>
-</ul>
-
-<%= live_render(@conn, AllTheSinglePhotosWeb.LiveCounter) %>
 <%= live_render(@conn, AllTheSinglePhotosWeb.AlbumViewer, session: %{ token: @conn.assigns[:user][:token] }) %>
