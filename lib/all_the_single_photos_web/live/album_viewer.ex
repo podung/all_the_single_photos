@@ -4,17 +4,32 @@ defmodule AllTheSinglePhotosWeb.AlbumViewer do
   def render(assigns) do
     ~L"""
     <div>
-      <h3>Your photo albums:</h3>
+      <h3>your photo albums:</h3>
       <button phx-click="next">next</button>
 
       <%= if @loading do %>
 
-        <div>Loading....</div>
+        <div>Loading<%= assigns[:progress] %></div>
 
-      <%= else %>
+      <% else %>
         <ul>
           <%= Enum.map(assigns[:albums], fn album -> %>
             <li><%= Map.get(album, "title") %></li>
+          <% end) %>
+        </ul>
+
+      <% end %>
+
+      <button phx-click="photos">photos</button>
+
+      <%= if @photos_loading do %>
+
+        <div>Loading<%= assigns[:photos_progress] %></div>
+
+      <% else %>
+        <ul>
+          <%= Enum.map(assigns[:photos], fn photo -> %>
+            <li><%= Map.get(photo, "id") %></li>
           <% end) %>
         </ul>
 
@@ -27,7 +42,11 @@ defmodule AllTheSinglePhotosWeb.AlbumViewer do
     socket = socket
       |> assign(:token, session.token)
       |> assign(:albums, [])
+      |> assign(:photos, [])
       |> assign(:loading, false)
+      |> assign(:photos_loading, false)
+      |> assign(:progress, "")
+      |> assign(:photos_progress, "")
 
     {:ok, socket}
   end
@@ -36,18 +55,45 @@ defmodule AllTheSinglePhotosWeb.AlbumViewer do
     auth_token = socket.assigns[:token]
     next_page_token = Map.get(socket.assigns, :next_page_token)
 
-    Task.async(fn -> fetchAlbums(auth_token, next_page_token) end)
+    caller_pid = self()
+    Task.async(fn -> AllTheSinglePhotos.PhotosApi.fetch_all_albums(auth_token, caller_pid) end)
 
     { :noreply, assign(socket, :loading, true) }
   end
 
+  def handle_event("photos", _, socket) do
+    auth_token = socket.assigns[:token]
+
+    caller_pid = self()
+    Task.async(fn -> AllTheSinglePhotos.PhotosApi.fetch_all_photos(auth_token, caller_pid) end)
+
+    { :noreply, assign(socket, :photos_loading, true) }
+  end
+
+
+  def handle_info({ :progress }, socket) do
+    { :noreply, update(socket, :progress, &(&1 <> ".")) }
+  end
+
+  def handle_info({ :photos_progress }, socket) do
+    { :noreply, update(socket, :photos_progress, &(&1 <> ".")) }
+  end
+
+  def handle_info({ _task, { :ok, { :photos, result } }}, socket) do
+    IO.inspect result
+
+    socket = socket
+    |> assign(:photos, Map.get(result, :photos))
+    |> assign(:photos_loading, false)
+
+    # ITS DONE
+    { :noreply, socket }
+  end
 
   def handle_info({ _task, { :ok, result }}, socket) do
     socket = socket
     |> assign(:albums, Map.get(result, :albums))
-    |> assign(:next_page_token, Map.get(result, :next_page_token))
     |> assign(:loading, false)
-
 
     # ITS DONE
     { :noreply, socket }
@@ -61,6 +107,7 @@ defmodule AllTheSinglePhotosWeb.AlbumViewer do
     { :noreply, assign(socket, :loading, false) }
   end
 
+
   #TODO: Do I have to explicitely handle :DOWN, etc?
   def handle_info(msg, socket) do
     IO.puts "LiveView Process received a message"
@@ -70,25 +117,4 @@ defmodule AllTheSinglePhotosWeb.AlbumViewer do
   end
 
   #TODO: move a bunch of this stuff to AllTheSinglePhotos - out of this file and out of web
-
-  def fetchAlbums(auth_token, next_page_token) do
-    url = "https://photoslibrary.googleapis.com/v1/albums?pageToken=#{next_page_token}"
-
-    headers = ["Authorization": "Bearer #{auth_token}", "Accept": "Application/json; Charset=utf-8"]
-
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body }} <- HTTPoison.get(url, headers),
-         {:ok, decoded} <- Poison.decode(body)
-    do
-      #TODO: make a decoder, that just decodes the data I need
-
-      {:ok, %{
-          albums: Map.get(decoded, "albums"),
-          next_page_token: Map.get(decoded, "nextPageToken")
-        }
-      }
-    else
-      #TODO: report error somewhere
-      err -> { :error, err }
-    end
-  end
 end
